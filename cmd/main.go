@@ -14,7 +14,12 @@ var usage = fmt.Sprintf(`Usage: %s <integer> [-h|--help]
 A greeter application which prints the name your entered <integer> number of times.
 `, os.Args[0])
 
-type config struct {
+const (
+	ERR_INVALID_NUM_ARGS  = "invalid number of arguments"
+	ERR_GREATER_THAN_ZERO = "must specify a number greater than 0"
+)
+
+type configGreeter struct {
 	timesPrinted int
 	isHelp       bool
 }
@@ -41,28 +46,28 @@ func main() {
 	}
 }
 
-func parseArgs(args []string) (*config, error) {
+func parseArgs(args []string) (*configGreeter, error) {
 	if len(args) != 1 {
-		return &config{}, errors.New("invalid number or arguments")
+		return &configGreeter{}, errors.New(ERR_INVALID_NUM_ARGS)
 	}
 	if args[0] == "-h" || args[0] == "--help" {
-		return &config{isHelp: true}, nil
+		return &configGreeter{isHelp: true}, nil
 	}
 	num, err := strconv.Atoi(args[0])
 	if err != nil {
-		return &config{}, err
+		return &configGreeter{}, err
 	}
-	return &config{timesPrinted: num}, nil
+	return &configGreeter{timesPrinted: num}, nil
 }
 
-func validateArgs(c *config) error {
+func validateArgs(c *configGreeter) error {
 	if !(c.timesPrinted > 0) {
-		return errors.New("must specify a number greater than 0")
+		return errors.New(ERR_GREATER_THAN_ZERO)
 	}
 	return nil
 }
 
-func runCmd(r io.Reader, w io.Writer, c *config) error {
+func runCmd(r io.Reader, w io.Writer, c *configGreeter) error {
 	if c.isHelp {
 		fmt.Fprint(w, usage)
 		return nil
@@ -90,7 +95,7 @@ func getName(r io.Reader, w io.Writer) (string, error) {
 	return name, nil
 }
 
-func greetUser(w io.Writer, c *config, name string) {
+func greetUser(w io.Writer, c *configGreeter, name string) {
 	msg := fmt.Sprintf("Nice to meet you, %s!\n", name)
 	for i := 0; i < c.timesPrinted; i++ {
 		fmt.Fprint(w, msg)
