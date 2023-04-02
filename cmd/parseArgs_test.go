@@ -5,14 +5,14 @@ import (
 	"testing"
 )
 
-type testConfig struct {
+type testConfigParseArgs struct {
 	args   []string
 	config *configGreeter
 	err    error
 }
 
 func TestParseArgs(t *testing.T) {
-	tests := []testConfig{
+	tests := []testConfigParseArgs{
 		{
 			args: []string{"-h"},
 			config: &configGreeter{
@@ -57,8 +57,8 @@ func TestParseArgs(t *testing.T) {
 
 	for _, test := range tests {
 		config, err := parseArgs(test.args)
-		if test.err != nil && err != test.err {
-			t.Fatalf("Expected error to be: %q,\n got: %q\n", test.err, err)
+		if test.err != nil && errors.Is(err, test.err) {
+			t.Fatalf("Expected error to be: %q,\ngot: %q\n", test.err, err)
 		} else if test.err == nil && err != nil {
 			t.Errorf("Expected nil error. Got: %q\n", err)
 		} else if test.config.isHelp != config.isHelp {

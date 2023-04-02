@@ -17,6 +17,9 @@ A greeter application which prints the name your entered <integer> number of tim
 const (
 	ERR_INVALID_NUM_ARGS  = "invalid number of arguments"
 	ERR_GREATER_THAN_ZERO = "must specify a number greater than 0"
+	ERR_EMPTY_NAME_STRING = "empty name string"
+
+	STR_ASK_FOR_NAME = "Your name, please? Press ENTER when done.\n"
 )
 
 type configGreeter struct {
@@ -82,15 +85,14 @@ func runCmd(r io.Reader, w io.Writer, c *configGreeter) error {
 
 func getName(r io.Reader, w io.Writer) (string, error) {
 	scanner := bufio.NewScanner(r)
-	msg := "Your name, please? Press ENTER when done.\n"
-	fmt.Fprintf(w, msg)
+	fmt.Fprintf(w, STR_ASK_FOR_NAME)
 	scanner.Scan()
 	if err := scanner.Err(); err != nil {
 		return "", err
 	}
 	name := scanner.Text()
 	if !(len(name) > 0) {
-		return "", errors.New("empty name string")
+		return "", errors.New(ERR_EMPTY_NAME_STRING)
 	}
 	return name, nil
 }
