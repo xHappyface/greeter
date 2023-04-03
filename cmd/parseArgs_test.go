@@ -9,6 +9,7 @@ import (
 
 type testConfigParseArgs struct {
 	args   []string
+	output string
 	config *configGreeter
 	err    error
 }
@@ -16,7 +17,9 @@ type testConfigParseArgs struct {
 func TestParseArgs(t *testing.T) {
 	tests := []testConfigParseArgs{
 		{
-			args:   []string{"-h"},
+			args: []string{"-h"},
+			output: "A greeter application which prints the name your entered a specified number of times.\n\nUsage of greeter: <options> [name]\n" +
+				"Options:\n\n  -n int\n    \tNumber of times to greet.\n\n",
 			config: &configGreeter{},
 			err:    flag.ErrHelp,
 		},
@@ -33,7 +36,15 @@ func TestParseArgs(t *testing.T) {
 			err:    errors.New("invalid value \"abc\" for flag -n: parse error"),
 		},
 		{
-			args: []string{"-n", "1", "foo"},
+			args: []string{"-n", "1", "John Doe"},
+			config: &configGreeter{
+				timesPrinted: 1,
+				name:         "John Doe",
+			},
+			err: nil,
+		},
+		{
+			args: []string{"-n", "1", "John", "Doe"},
 			config: &configGreeter{
 				timesPrinted: 1,
 			},
@@ -50,6 +61,10 @@ func TestParseArgs(t *testing.T) {
 			t.Errorf("Expected error to be nil, got: %q\n", err)
 		} else if config.timesPrinted != test.config.timesPrinted {
 			t.Errorf("Expected timesPrinted to be: %d, got %d\n", test.config.timesPrinted, config.timesPrinted)
+		}
+		gotMsg := byteBuf.String()
+		if len(test.output) > 0 && gotMsg != test.output {
+			t.Errorf("Expected stdout to be: %#v,\ngot: %#v\n", test.output, gotMsg)
 		}
 	}
 	byteBuf.Reset()

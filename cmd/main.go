@@ -62,7 +62,6 @@ func parseArgs(w io.Writer, args []string) (*configGreeter, error) {
 	if err != nil {
 		return config, err
 	} else if fs.NArg() > 1 {
-		fmt.Println(fs.NArg())
 		return config, ERR_POS_ARG_SPECIFIED
 	}
 	config.name = fs.Arg(0)
