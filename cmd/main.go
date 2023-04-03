@@ -9,11 +9,6 @@ import (
 	"os"
 )
 
-var usage = fmt.Sprintf(`Usage: %s <integer> [-h|--help]
-
-A greeter application which prints the name your entered <integer> number of times.
-`, os.Args[0])
-
 var (
 	ERR_POS_ARG_SPECIFIED = errors.New("positional arguments specified")
 	ERR_GREATER_THAN_ZERO = errors.New("must specify a number greater than 0")
@@ -26,6 +21,7 @@ const (
 
 type configGreeter struct {
 	timesPrinted int
+	name         string
 }
 
 func main() {
@@ -36,19 +32,16 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Fprintf(w, "ERR: %v\n", err)
-		fmt.Fprint(w, usage)
 		os.Exit(1)
 	}
 	err = validateArgs(c)
 	if err != nil {
 		fmt.Fprintf(w, "ERR: %v\n", err)
-		fmt.Fprint(w, usage)
 		os.Exit(1)
 	}
 	err = runCmd(r, w, c)
 	if err != nil {
 		fmt.Fprintf(w, "ERR; %v\n", err)
-		fmt.Fprint(w, usage)
 		os.Exit(1)
 	}
 }
@@ -57,13 +50,22 @@ func parseArgs(w io.Writer, args []string) (*configGreeter, error) {
 	config := new(configGreeter)
 	fs := flag.NewFlagSet("greeter", flag.ContinueOnError)
 	fs.SetOutput(w)
+	fs.Usage = func() {
+		strUsage := "A greeter application which prints the name your entered a specified number of times.\n\nUsage of %s: <options> [name]\n"
+		fmt.Fprintf(w, strUsage, fs.Name())
+		fmt.Fprint(w, "Options:\n\n")
+		fs.PrintDefaults()
+		fmt.Fprintln(w)
+	}
 	fs.IntVar(&config.timesPrinted, "n", 0, "Number of times to greet.")
 	err := fs.Parse(args)
 	if err != nil {
 		return config, err
-	} else if fs.NArg() != 0 {
+	} else if fs.NArg() > 1 {
+		fmt.Println(fs.NArg())
 		return config, ERR_POS_ARG_SPECIFIED
 	}
+	config.name = fs.Arg(0)
 	return config, nil
 }
 
@@ -75,11 +77,14 @@ func validateArgs(c *configGreeter) error {
 }
 
 func runCmd(r io.Reader, w io.Writer, c *configGreeter) error {
-	name, err := getName(r, w)
-	if err != nil {
-		return err
+	var err error
+	if !(len(c.name) > 0) {
+		c.name, err = getName(r, w)
+		if err != nil {
+			return err
+		}
 	}
-	greetUser(w, c, name)
+	greetUser(w, c)
 	return nil
 }
 
@@ -97,8 +102,8 @@ func getName(r io.Reader, w io.Writer) (string, error) {
 	return name, nil
 }
 
-func greetUser(w io.Writer, c *configGreeter, name string) {
-	msg := fmt.Sprintf("Nice to meet you, %s!\n", name)
+func greetUser(w io.Writer, c *configGreeter) {
+	msg := fmt.Sprintf("Nice to meet you, %s!\n", c.name)
 	for i := 0; i < c.timesPrinted; i++ {
 		fmt.Fprint(w, msg)
 	}
