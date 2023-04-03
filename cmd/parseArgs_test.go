@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"errors"
+	"flag"
 	"testing"
 )
 
@@ -14,57 +16,41 @@ type testConfigParseArgs struct {
 func TestParseArgs(t *testing.T) {
 	tests := []testConfigParseArgs{
 		{
-			args: []string{"-h"},
-			config: &configGreeter{
-				timesPrinted: 0,
-				isHelp:       true,
-			},
-			err: nil,
+			args:   []string{"-h"},
+			config: &configGreeter{},
+			err:    flag.ErrHelp,
 		},
 		{
-			args: []string{"5"},
+			args: []string{"-n", "5"},
 			config: &configGreeter{
 				timesPrinted: 5,
-				isHelp:       false,
 			},
 			err: nil,
 		},
 		{
-			args: []string{"abc"},
-			config: &configGreeter{
-				timesPrinted: 0,
-				isHelp:       false,
-			},
-			err: errors.New("strconv.Atoi: parsing \"abc\": invalid syntax"),
+			args:   []string{"-n", "abc"},
+			config: &configGreeter{},
+			err:    errors.New("invalid value \"abc\" for flag -n: parse error"),
 		},
 		{
-			args: []string{"1", "foo"},
+			args: []string{"-n", "1", "foo"},
 			config: &configGreeter{
-				timesPrinted: 0,
-				isHelp:       false,
+				timesPrinted: 1,
 			},
-			err: errors.New(ERR_INVALID_NUM_ARGS),
-		},
-		{
-			args: []string{"0"},
-			config: &configGreeter{
-				timesPrinted: 0,
-				isHelp:       false,
-			},
-			err: errors.New(ERR_GREATER_THAN_ZERO),
+			err: ERR_POS_ARG_SPECIFIED,
 		},
 	}
 
+	byteBuf := new(bytes.Buffer)
 	for _, test := range tests {
-		config, err := parseArgs(test.args)
-		if test.err != nil && errors.Is(err, test.err) {
-			t.Fatalf("Expected error to be: %q,\ngot: %q\n", test.err, err)
+		config, err := parseArgs(byteBuf, test.args)
+		if test.err != nil && errors.Unwrap(err) != errors.Unwrap(test.err) {
+			t.Errorf("Expected error to be: %q,\ngot: %q\n", test.err, err)
 		} else if test.err == nil && err != nil {
-			t.Errorf("Expected nil error. Got: %q\n", err)
-		} else if test.config.isHelp != config.isHelp {
-			t.Errorf("Expected isHelp to be: %t, got: %t\n", test.config.isHelp, config.isHelp)
-		} else if test.config.timesPrinted != config.timesPrinted {
-			t.Errorf("Expected timesPrinted to be: %d, got: %d\n", test.config.timesPrinted, config.timesPrinted)
+			t.Errorf("Expected error to be nil, got: %q\n", err)
+		} else if config.timesPrinted != test.config.timesPrinted {
+			t.Errorf("Expected timesPrinted to be: %d, got %d\n", test.config.timesPrinted, config.timesPrinted)
 		}
 	}
+	byteBuf.Reset()
 }

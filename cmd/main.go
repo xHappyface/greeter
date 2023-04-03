@@ -3,10 +3,10 @@ package main
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 )
 
 var usage = fmt.Sprintf(`Usage: %s <integer> [-h|--help]
@@ -14,23 +14,27 @@ var usage = fmt.Sprintf(`Usage: %s <integer> [-h|--help]
 A greeter application which prints the name your entered <integer> number of times.
 `, os.Args[0])
 
-const (
-	ERR_INVALID_NUM_ARGS  = "invalid number of arguments"
-	ERR_GREATER_THAN_ZERO = "must specify a number greater than 0"
-	ERR_EMPTY_NAME_STRING = "empty name string"
+var (
+	ERR_POS_ARG_SPECIFIED = errors.New("positional arguments specified")
+	ERR_GREATER_THAN_ZERO = errors.New("must specify a number greater than 0")
+	ERR_EMPTY_NAME_STRING = errors.New("empty name string")
+)
 
+const (
 	STR_ASK_FOR_NAME = "Your name, please? Press ENTER when done.\n"
 )
 
 type configGreeter struct {
 	timesPrinted int
-	isHelp       bool
 }
 
 func main() {
 	r, w := os.Stdin, os.Stdout
-	c, err := parseArgs(os.Args[1:])
+	c, err := parseArgs(w, os.Args[1:])
 	if err != nil {
+		if !(errors.Is(err, ERR_POS_ARG_SPECIFIED)) {
+			os.Exit(1)
+		}
 		fmt.Fprintf(w, "ERR: %v\n", err)
 		fmt.Fprint(w, usage)
 		os.Exit(1)
@@ -49,32 +53,28 @@ func main() {
 	}
 }
 
-func parseArgs(args []string) (*configGreeter, error) {
-	if len(args) != 1 {
-		return &configGreeter{}, errors.New(ERR_INVALID_NUM_ARGS)
-	}
-	if args[0] == "-h" || args[0] == "--help" {
-		return &configGreeter{isHelp: true}, nil
-	}
-	num, err := strconv.Atoi(args[0])
+func parseArgs(w io.Writer, args []string) (*configGreeter, error) {
+	config := new(configGreeter)
+	fs := flag.NewFlagSet("greeter", flag.ContinueOnError)
+	fs.SetOutput(w)
+	fs.IntVar(&config.timesPrinted, "n", 0, "Number of times to greet.")
+	err := fs.Parse(args)
 	if err != nil {
-		return &configGreeter{}, err
+		return config, err
+	} else if fs.NArg() != 0 {
+		return config, ERR_POS_ARG_SPECIFIED
 	}
-	return &configGreeter{timesPrinted: num}, nil
+	return config, nil
 }
 
 func validateArgs(c *configGreeter) error {
 	if !(c.timesPrinted > 0) {
-		return errors.New(ERR_GREATER_THAN_ZERO)
+		return ERR_GREATER_THAN_ZERO
 	}
 	return nil
 }
 
 func runCmd(r io.Reader, w io.Writer, c *configGreeter) error {
-	if c.isHelp {
-		fmt.Fprint(w, usage)
-		return nil
-	}
 	name, err := getName(r, w)
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func getName(r io.Reader, w io.Writer) (string, error) {
 	}
 	name := scanner.Text()
 	if !(len(name) > 0) {
-		return "", errors.New(ERR_EMPTY_NAME_STRING)
+		return "", ERR_EMPTY_NAME_STRING
 	}
 	return name, nil
 }

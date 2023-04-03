@@ -1,0 +1,27 @@
+mode: set
+github.com/xHappyface/greeter/cmd/main.go:31.13,34.16 3 0
+github.com/xHappyface/greeter/cmd/main.go:34.16,35.47 1 0
+github.com/xHappyface/greeter/cmd/main.go:35.47,37.4 1 0
+github.com/xHappyface/greeter/cmd/main.go:38.3,40.13 3 0
+github.com/xHappyface/greeter/cmd/main.go:42.2,43.16 2 0
+github.com/xHappyface/greeter/cmd/main.go:43.16,47.3 3 0
+github.com/xHappyface/greeter/cmd/main.go:48.2,49.16 2 0
+github.com/xHappyface/greeter/cmd/main.go:49.16,53.3 3 0
+github.com/xHappyface/greeter/cmd/main.go:56.68,62.16 6 1
+github.com/xHappyface/greeter/cmd/main.go:62.16,64.3 1 1
+github.com/xHappyface/greeter/cmd/main.go:64.8,64.27 1 1
+github.com/xHappyface/greeter/cmd/main.go:64.27,66.3 1 1
+github.com/xHappyface/greeter/cmd/main.go:67.2,67.20 1 1
+github.com/xHappyface/greeter/cmd/main.go:70.43,71.27 1 1
+github.com/xHappyface/greeter/cmd/main.go:71.27,73.3 1 1
+github.com/xHappyface/greeter/cmd/main.go:74.2,74.12 1 1
+github.com/xHappyface/greeter/cmd/main.go:77.63,79.16 2 1
+github.com/xHappyface/greeter/cmd/main.go:79.16,81.3 1 1
+github.com/xHappyface/greeter/cmd/main.go:82.2,83.12 2 1
+github.com/xHappyface/greeter/cmd/main.go:86.56,90.38 4 1
+github.com/xHappyface/greeter/cmd/main.go:90.38,92.3 1 0
+github.com/xHappyface/greeter/cmd/main.go:93.2,94.22 2 1
+github.com/xHappyface/greeter/cmd/main.go:94.22,96.3 1 1
+github.com/xHappyface/greeter/cmd/main.go:97.2,97.18 1 1
+github.com/xHappyface/greeter/cmd/main.go:100.60,102.38 2 1
+github.com/xHappyface/greeter/cmd/main.go:102.38,104.3 1 1

@@ -18,17 +18,11 @@ func TestRunCmd(t *testing.T) {
 	tests := []testConfigRunCmd{
 		{
 			config: &configGreeter{
-				isHelp: true,
-			},
-			output: usage,
-		},
-		{
-			config: &configGreeter{
 				timesPrinted: 5,
 			},
 			input:  "",
 			output: STR_ASK_FOR_NAME,
-			err:    errors.New(ERR_EMPTY_NAME_STRING),
+			err:    ERR_EMPTY_NAME_STRING,
 		},
 		{
 			config: &configGreeter{
@@ -45,7 +39,7 @@ func TestRunCmd(t *testing.T) {
 		err := runCmd(r, byteBuf, test.config)
 		if err != nil && test.err == nil {
 			t.Fatalf("Expected error to be nil, got: %q\n", err)
-		} else if test.err != nil && errors.Is(err, test.err) {
+		} else if test.err != nil && !errors.Is(err, test.err) {
 			t.Fatalf("Expected error to be: %q,\n, got: %q\n", test.err, err)
 		}
 		gotMsg := byteBuf.String()
