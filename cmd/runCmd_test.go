@@ -30,6 +30,16 @@ func TestRunCmd(t *testing.T) {
 			},
 			input:  "Bill Bryson",
 			output: STR_ASK_FOR_NAME + strings.Repeat("Nice to meet you, Bill Bryson!\n", 5),
+			err:    nil,
+		},
+		{
+			config: &configGreeter{
+				timesPrinted: 5,
+				name:         "Bill Bryson",
+			},
+			input:  "",
+			output: strings.Repeat("Nice to meet you, Bill Bryson!\n", 5),
+			err:    nil,
 		},
 	}
 
@@ -37,10 +47,10 @@ func TestRunCmd(t *testing.T) {
 	for _, test := range tests {
 		r := strings.NewReader(test.input)
 		err := runCmd(r, byteBuf, test.config)
-		if err != nil && test.err == nil {
-			t.Fatalf("Expected error to be nil, got: %q\n", err)
-		} else if test.err != nil && !errors.Is(err, test.err) {
+		if test.err != nil && !errors.Is(err, test.err) {
 			t.Fatalf("Expected error to be: %q,\n, got: %q\n", test.err, err)
+		} else if err != nil && test.err == nil {
+			t.Fatalf("Expected error to be nil, got: %q\n", err)
 		}
 		gotMsg := byteBuf.String()
 		if gotMsg != test.output {
